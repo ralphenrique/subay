@@ -4,6 +4,7 @@ export const THEME = {
   light: {
     background: 'hsl(0 0% 100%)',
     foreground: 'hsl(0 0% 3.9%)',
+    whiteDefaults: 'hsl(0 0% 100%)',
     card: 'hsl(0 0% 100%)',
     cardForeground: 'hsl(0 0% 3.9%)',
     popover: 'hsl(0 0% 100%)',
@@ -30,6 +31,7 @@ export const THEME = {
   dark: {
     background: 'hsl(0 0% 3.9%)',
     foreground: 'hsl(0 0% 98%)',
+    whiteDefaults: 'hsl(0 0% 100%)',
     card: 'hsl(0 0% 3.9%)',
     cardForeground: 'hsl(0 0% 98%)',
     popover: 'hsl(0 0% 3.9%)',

@@ -10,17 +10,11 @@ import Animated, {
   useAnimatedReaction,
   runOnJS,
 } from 'react-native-reanimated';
-import { Text } from '@/components/ui/text';
-import { Button } from '@/components/ui/button';
 import { useUser } from '@clerk/clerk-expo';
 import { useColorScheme } from 'nativewind';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
-import BottomSheet, {
-  BottomSheetBackgroundProps,
-  BottomSheetView,
-  useBottomSheetSpringConfigs,
-} from '@gorhom/bottom-sheet';
+import BottomSheet from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -31,8 +25,7 @@ import {
   GRID_COLUMNS_MONTH,
   MS_PER_DAY,
 } from '@/components/ui/calendar';
-
-const AnimatedBottomSheetView = Animated.createAnimatedComponent(BottomSheetView);
+import { BottomSheetContent } from '@/components/ui/bottom-sheet-content';
 
 const clamp01 = (value: number) => {
   'worklet';
@@ -69,7 +62,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const defaultStatusBarStyle: 'light' | 'dark' = colorScheme === 'dark' ? 'light' : 'dark';
   const invertedStatusBarStyle: 'light' | 'dark' =
-    defaultStatusBarStyle === 'light' ? 'dark' : 'light';
+  defaultStatusBarStyle === 'light' ? 'dark' : 'light';
 
   const [statusBarStyle, setStatusBarStyle] = useState<'light' | 'dark'>(defaultStatusBarStyle);
 
@@ -78,7 +71,6 @@ export default function HomeScreen() {
   }, []);
 
   const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-  const snapPoints = useMemo(() => ['30%', '60%', '100%'], []);
   const calendarData = useMemo<Record<GridMode, CalendarGridData>>(() => {
     const startOfYear = new Date(year, 0, 1);
     const endOfYear = new Date(year + 1, 0, 1);
@@ -125,18 +117,6 @@ export default function HomeScreen() {
 
   const filledColor = whiteDefaults;
   const upcomingColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)';
-
-  // const getTimeOfDay = () => {
-  //   const hour = new Date().getHours();
-  //   if (hour < 12) return 'Morning';
-  //   if (hour < 18) return 'Afternoon';
-  //   return 'Evening';
-  // };
-
-  const animationConfigs = useBottomSheetSpringConfigs({
-    damping: 80,
-    stiffness: 500,
-  });
 
   useEffect(() => {
     const now = new Date();
@@ -186,33 +166,6 @@ export default function HomeScreen() {
     setStatusBarStyleIfNeeded(nextStyle);
   }, [animatedPosition, SCREEN_HEIGHT, setStatusBarStyleIfNeeded, defaultStatusBarStyle, invertedStatusBarStyle]);
 
-  // Animated background for Bottom Sheet
-  const AnimatedBackground = ({
-    style,
-    animatedPosition: sheetAnimatedPosition,
-  }: BottomSheetBackgroundProps) => {
-    const animatedStyle = useAnimatedStyle(() => {
-      const transitionStartHeight = SCREEN_HEIGHT * 0.2;
-      const transitionEndHeight = SCREEN_HEIGHT * 0;
-      const startRadius = 50;
-
-      const progress = getProgressByHeight(
-        sheetAnimatedPosition.value,
-        transitionStartHeight,
-        transitionEndHeight
-      );
-
-      const borderRadius = startRadius - startRadius * progress;
-
-      return {
-        borderTopLeftRadius: borderRadius,
-        borderTopRightRadius: borderRadius,
-        backgroundColor: whiteDefaults,
-      };
-    }, [whiteDefaults]);
-
-    return <Animated.View style={[style, animatedStyle]} />;
-  };
   // Text and content animations
   const animatedTextStyle = useAnimatedStyle(() => {
     const transitionStartHeight = SCREEN_HEIGHT * 0.15; // Start transition when the sheet's top is at 60% of the screen
@@ -256,25 +209,6 @@ export default function HomeScreen() {
     };
   });
   // Bottom sheet content animation
-  const animatedBottomSheetContentStyle = useAnimatedStyle(() => {
-    const transitionStartHeight = SCREEN_HEIGHT * 0.2;
-    const transitionEndHeight = SCREEN_HEIGHT * 0;
-
-    const progress = getProgressByHeight(
-      animatedPosition.value,
-      transitionStartHeight,
-      transitionEndHeight
-    );
-
-    const offsetStart = 0;
-    const offsetEnd = 98;
-    const translateY = offsetStart + (offsetEnd - offsetStart) * progress;
-
-    return {
-      transform: [{ translateY }],
-    };
-  });
-
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -328,34 +262,13 @@ export default function HomeScreen() {
             upcomingColor={upcomingColor}
           />
         </View>
-        <BottomSheet
-          ref={bottomSheetRef}
-          index={1}
-          snapPoints={snapPoints}
-          animationConfigs={animationConfigs}
+        <BottomSheetContent
+          bottomSheetRef={bottomSheetRef}
           animatedPosition={animatedPosition}
-          topInset={0}
-          enableOverDrag={false}
-          containerStyle={{ zIndex: 5 }}
-          backgroundComponent={AnimatedBackground}
-          handleStyle={{ display: 'none' }}
-        >
-          <AnimatedBottomSheetView
-            className='flex-1 h-full p-6'
-            style={animatedBottomSheetContentStyle}
-          >
-            <Text className='text-2xl font-nothing text-black'>Awesome 🎉</Text>
-            <Button
-              variant='outline'
-              className='self-start'
-              onPress={toggleColorScheme}
-            >
-              <Text className='text-base font-semibold'>
-                {colorScheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              </Text>
-            </Button>
-          </AnimatedBottomSheetView>
-        </BottomSheet>
+          whiteDefaults={whiteDefaults}
+          colorScheme={colorScheme}
+          toggleColorScheme={toggleColorScheme}
+        />
       </View>
     </GestureHandlerRootView>
   );

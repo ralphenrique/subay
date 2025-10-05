@@ -27,6 +27,7 @@ export const GRID_COLUMNS_YEAR = 20;
 export const GRID_COLUMNS_MONTH = 7;
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 export const GRID_MODES: GridMode[] = ['year', 'month'];
+const DOUBLE_TAP_DELAY = 300;
 
 // Counter animation constants
 const CHAR_TRAVEL = 18;
@@ -262,6 +263,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [labelDirection, setLabelDirection] = useState<'up' | 'down'>('down');
   const gridTransition = useSharedValue(1);
   const previousGridOpacity = useSharedValue(0);
+  const lastTapRef = useRef<number>(0);
 
   const daysRemainingLabel = calendarData[gridMode].daysRemainingLabel;
 
@@ -298,6 +300,29 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       },
     ],
   }));
+
+  const toggleGridMode = useCallback(() => {
+    const nextMode = gridMode === 'year' ? 'month' : 'year';
+    handleGridModeChange(nextMode);
+  }, [gridMode, handleGridModeChange]);
+
+  const handleGridDoubleTap = useCallback(() => {
+    if (isSwitchingModes) {
+      return;
+    }
+
+    toggleGridMode();
+  }, [isSwitchingModes, toggleGridMode]);
+
+  const handleGridPress = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      lastTapRef.current = 0;
+      handleGridDoubleTap();
+    } else {
+      lastTapRef.current = now;
+    }
+  }, [handleGridDoubleTap]);
 
   const finishGridTransition = useCallback(() => {
     setPreviousMode(null);
@@ -340,65 +365,48 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             textClassName='text-sm font-nothing text-muted-foreground'
           />
         </View>
-        <View className='flex flex-row overflow-hidden rounded-full border border-muted/40 bg-muted/10'>
-          {GRID_MODES.map((mode) => {
-            const isActive = gridMode === mode;
-            return (
-              <Pressable
-                key={mode}
-                onPress={() => handleGridModeChange(mode)}
-                accessibilityRole="button"
-                accessibilityState={{
-                  selected: isActive,
-                  busy: isSwitchingModes && isActive,
-                }}
-                disabled={isSwitchingModes && !isActive}
-                className={`px-3 py-1 ${isActive ? 'bg-foreground' : 'bg-transparent'} ${isSwitchingModes && !isActive ? 'opacity-60' : ''
-                  }`}
-              >
-                <Text
-                  className={`text-xs font-nothing ${isActive ? 'text-background' : 'text-muted-foreground'
-                    }`}
-                >
-                  {mode === 'year' ? 'Year' : 'Month'}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
       </View>
-      <View style={{ position: 'relative' }}>
-        {previousMode && (
-          <Animated.View
-            pointerEvents='none'
-            style={[
-              {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-              },
-              animatedPreviousGridStyle,
-            ]}
-          >
+      <Pressable
+        onPress={handleGridPress}
+        accessibilityRole='button'
+        accessibilityLabel='Toggle calendar view'
+        accessibilityHint={`Double tap to switch to ${gridMode === 'year' ? 'monthly' : 'yearly'} view`}
+        accessibilityState={{ busy: isSwitchingModes }}
+      >
+        <View style={{ position: 'relative' }}>
+          {previousMode && (
+            <Animated.View
+              pointerEvents='none'
+              style={[
+                {
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                },
+                animatedPreviousGridStyle,
+              ]}
+            >
+              <CalendarGrid
+                data={calendarData[previousMode]}
+                filledColor={filledColor}
+                upcomingColor={upcomingColor}
+              />
+            </Animated.View>
+          )}
+          <Animated.View style={[animatedCurrentGridStyle]}>
             <CalendarGrid
-              data={calendarData[previousMode]}
+              data={calendarData[gridMode]}
               filledColor={filledColor}
               upcomingColor={upcomingColor}
             />
           </Animated.View>
-        )}
-        <Animated.View
-          style={[
-            animatedCurrentGridStyle,
-          ]}
-        >
-          <CalendarGrid
-            data={calendarData[gridMode]}
-            filledColor={filledColor}
-            upcomingColor={upcomingColor}
-          />
-        </Animated.View>
+        </View>
+      </Pressable>
+      <View className='rounded-full border border-muted/40 bg-muted/10 px-3 py-1 flex items-center mt-3 self-center'>
+        <Text className='text-xs font-nothing text-muted-foreground'>
+          Double tap the calendar to switch to {gridMode === 'year' ? 'month' : 'year'} view
+        </Text>
       </View>
     </View>
   );
