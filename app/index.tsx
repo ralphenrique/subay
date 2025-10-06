@@ -24,9 +24,9 @@ import {
   GRID_COLUMNS_YEAR,
   GRID_COLUMNS_MONTH,
   MS_PER_DAY,
-} from '@/components/ui/calendar';
-import { BottomSheetContent } from '@/components/ui/bottom-sheet-content';
-import { AddTaskSheet, type AddTaskSheetRef } from '@/components/ui/add-task-sheet';
+} from '@/components/organisms/calendar';
+import { BottomSheetContent } from '@/components/templates/bottom-sheet-content';
+import { AddTaskSheet, type AddTaskSheetRef } from '@/components/templates/add-task-sheet';
 
 const clamp01 = (value: number) => {
   'worklet';
