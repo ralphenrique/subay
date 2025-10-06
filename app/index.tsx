@@ -2,7 +2,6 @@ import {
   View,
   Dimensions,
   type LayoutChangeEvent,
-  KeyboardAvoidingView,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -27,6 +26,7 @@ import {
   MS_PER_DAY,
 } from '@/components/ui/calendar';
 import { BottomSheetContent } from '@/components/ui/bottom-sheet-content';
+import { AddTaskSheet, type AddTaskSheetRef } from '@/components/ui/add-task-sheet';
 
 const clamp01 = (value: number) => {
   'worklet';
@@ -58,6 +58,8 @@ export default function HomeScreen() {
   const dayMonth = today.toLocaleDateString('en-US', { month: 'long', day: '2-digit' });
   const year = today.getFullYear();
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const addTaskSheetRef = useRef<AddTaskSheetRef>(null);
+  const isMountedRef = useRef(false);
   const [currentSnapIndex, setCurrentSnapIndex] = useState(1);
   const animatedPosition = useSharedValue(0);
   const insets = useSafeAreaInsets();
@@ -69,7 +71,19 @@ export default function HomeScreen() {
   const [headerHeight, setHeaderHeight] = useState(0);
 
   const setStatusBarStyleIfNeeded = useCallback((nextStyle: 'light' | 'dark') => {
+    if (!isMountedRef.current) {
+      return;
+    }
+
     setStatusBarStyle((current) => (current === nextStyle ? current : nextStyle));
+  }, []);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -217,6 +231,16 @@ export default function HomeScreen() {
     setHeaderHeight((current) => (Math.abs(current - height) < 0.5 ? current : height));
   }, []);
 
+  const handlePressAddTask = useCallback(() => {
+    addTaskSheetRef.current?.present();
+  }, []);
+
+  const handleAddTask = useCallback((taskTitle: string) => {
+    // Handle adding the task here - you can integrate with your state management or database
+    console.log('New task:', taskTitle);
+    // TODO: Add task to your task list/database
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View className='flex-1 bg-background'>
@@ -271,6 +295,11 @@ export default function HomeScreen() {
           />
         </View>
 
+        <AddTaskSheet
+          ref={addTaskSheetRef}
+          colorScheme={colorScheme}
+          onAddTask={handleAddTask}
+        />
         <BottomSheetContent
           bottomSheetRef={bottomSheetRef}
           animatedPosition={animatedPosition}
@@ -278,7 +307,9 @@ export default function HomeScreen() {
           colorScheme={colorScheme}
           toggleColorScheme={toggleColorScheme}
           headerHeight={headerHeight}
+          onPressAddTask={handlePressAddTask}
         />
+
       </View>
     </GestureHandlerRootView>
   );

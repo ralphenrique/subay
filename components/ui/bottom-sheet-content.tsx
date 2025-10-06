@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { Dimensions, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -12,14 +12,13 @@ import BottomSheet, {
   BottomSheetView,
   BottomSheetScrollView,
   useBottomSheetSpringConfigs,
+  
 } from '@gorhom/bottom-sheet';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Asterisk, Sun, Calendar, Check, Moon, Plus, MoreHorizontal } from 'lucide-react-native';
 
-const AnimatedBottomSheetView = Animated.createAnimatedComponent(BottomSheetView);
-const AnimatedBottomSheetScrollView = Animated.createAnimatedComponent(BottomSheetScrollView);
 const FALLBACK_HEADER_OFFSET = 98;
 
 // Dummy task data
@@ -59,6 +58,7 @@ type BottomSheetContentProps = {
   colorScheme: 'light' | 'dark' | undefined;
   toggleColorScheme: () => void;
   headerHeight: number;
+  onPressAddTask?: () => void;
 };
 
 export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
@@ -68,6 +68,7 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   colorScheme,
   toggleColorScheme,
   headerHeight,
+  onPressAddTask,
 }) => {
   const { height: SCREEN_HEIGHT } = Dimensions.get('window');
   const snapPoints = useMemo(() => ['30%', '100%'], []);
@@ -181,6 +182,8 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
     }
   };
 
+
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -194,6 +197,8 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
       handleComponent={null}
       backgroundComponent={AnimatedBackground}
       handleStyle={{ display: 'none', height: 0 }}
+      keyboardBehavior='extend'
+      keyboardBlurBehavior='none'
     >
       <BottomSheetView className='flex-1 h-full'>
         <Animated.View style={animatedBottomSheetContentStyle} className='flex-1'>
@@ -291,7 +296,7 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
           <Button
             className='flex-1 h-14 rounded-full items-center justify-center'
             onPress={() => {
-              // Template for adding new tasks - will be implemented later
+              onPressAddTask?.();
             }}
           >
             <Plus size={24} color={colorScheme === 'dark' ? '#000000' : '#FFFFFF'} />
