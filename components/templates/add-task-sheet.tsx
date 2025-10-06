@@ -18,10 +18,12 @@ export type AddTaskSheetRef = {
 type AddTaskSheetProps = {
   colorScheme: 'light' | 'dark' | undefined;
   onAddTask?: (taskTitle: string) => void;
+  onDismiss?: () => void;
+  onDismissStart?: () => void;
 };
 
 export const AddTaskSheet = forwardRef<AddTaskSheetRef, AddTaskSheetProps>(
-  ({ colorScheme, onAddTask }, ref) => {
+  ({ colorScheme, onAddTask, onDismiss, onDismissStart }, ref) => {
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     const [taskTitle, setTaskTitle] = React.useState('');
 
@@ -48,24 +50,25 @@ export const AddTaskSheet = forwardRef<AddTaskSheetRef, AddTaskSheetProps>(
         bottomSheetModalRef.current?.present();
       },
       dismiss: () => {
+        onDismissStart?.();
         bottomSheetModalRef.current?.dismiss();
-        resetForm();
       },
-    }), [resetForm]);
+    }), [onDismissStart]);
 
     const handleAddTask = () => {
       if (taskTitle.trim()) {
         onAddTask?.(taskTitle.trim());
-        resetForm();
       }
+      console.log('AddTaskSheet: handleAddTask - calling dismiss');
+      onDismissStart?.();
       bottomSheetModalRef.current?.dismiss();
-
     };
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
+      console.log('AddTaskSheet: handleClose - calling dismiss');
+      onDismissStart?.();
       bottomSheetModalRef.current?.dismiss();
-      resetForm();
-    };
+    }, [onDismissStart]);
 
     const renderBackdrop = useCallback(
       (props: any) => (
@@ -81,8 +84,10 @@ export const AddTaskSheet = forwardRef<AddTaskSheetRef, AddTaskSheetProps>(
     );
 
     const handleDismiss = useCallback(() => {
+      console.log('AddTaskSheet: handleDismiss called');
       resetForm();
-    }, [resetForm]);
+      onDismiss?.();
+    }, [resetForm, onDismiss]);
 
     return (
       <BottomSheetModal
@@ -95,10 +100,15 @@ export const AddTaskSheet = forwardRef<AddTaskSheetRef, AddTaskSheetProps>(
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: bgColor, shadowColor: '#000', shadowOffset: { width: 0, height: -5 }, shadowOpacity: 0.5, shadowRadius: 5, elevation: 5 }}
         handleIndicatorStyle={{ display: 'none' }}
-        containerStyle={{ zIndex: 10 }}
+        containerStyle={{ zIndex: 12 }}
         keyboardBehavior='extend'
         keyboardBlurBehavior='none'
         onDismiss={handleDismiss}
+        onChange={(index) => {
+          if (index === -1) {
+            onDismissStart?.();
+          }
+        }}
 
       >
         <BottomSheetView className="flex-1 px-6 pb-6">
@@ -115,7 +125,9 @@ export const AddTaskSheet = forwardRef<AddTaskSheetRef, AddTaskSheetProps>(
               onPress={handleClose}
               style={{ backgroundColor: inputBgColor }}
             >
-              <X size={20} color={textColor} />
+              <View pointerEvents="none">
+                <X size={20} color={textColor} />
+              </View>
             </Button>
           </View>
 

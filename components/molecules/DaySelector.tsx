@@ -21,7 +21,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   onDayPress,
 }) => {
   return (
-    <View className='flex-row px-4 py-6 gap-2'>
+    <View className='flex-row py-6 gap-2'>
       {days.map((item, index) => (
         <View
           key={index}

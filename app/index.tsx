@@ -26,6 +26,7 @@ import {
 } from '@/components/organisms/calendar';
 import { BottomSheetContent } from '@/components/templates/bottom-sheet-content';
 import { AddTaskSheet, type AddTaskSheetRef } from '@/components/templates/add-task-sheet';
+import { UserMenuSheet, type UserMenuSheetRef } from '@/components/templates/user-menu-sheet';
 
 const clamp01 = (value: number) => {
   'worklet';
@@ -58,7 +59,11 @@ export default function HomeScreen() {
   const year = today.getFullYear();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const addTaskSheetRef = useRef<AddTaskSheetRef>(null);
+  const userMenuSheetRef = useRef<UserMenuSheetRef>(null);
   const isMountedRef = useRef(false);
+  const isModalTransitioningRef = useRef<boolean>(false);
+  const modalTransitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isModalTransitioning, setIsModalTransitioning] = useState(false);
   const [currentSnapIndex, setCurrentSnapIndex] = useState(1);
   const animatedPosition = useSharedValue(0);
   const insets = useSafeAreaInsets();
@@ -68,6 +73,11 @@ export default function HomeScreen() {
 
   const [statusBarStyle, setStatusBarStyle] = useState<'light' | 'dark'>(defaultStatusBarStyle);
   const [headerHeight, setHeaderHeight] = useState(0);
+
+  const setModalTransitioning = useCallback((value: boolean) => {
+    isModalTransitioningRef.current = value;
+    setIsModalTransitioning(value);
+  }, []);
 
   const setStatusBarStyleIfNeeded = useCallback((nextStyle: 'light' | 'dark') => {
     if (!isMountedRef.current) {
@@ -82,6 +92,10 @@ export default function HomeScreen() {
 
     return () => {
       isMountedRef.current = false;
+      if (modalTransitionTimeoutRef.current) {
+        clearTimeout(modalTransitionTimeoutRef.current);
+        modalTransitionTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -231,14 +245,60 @@ export default function HomeScreen() {
   }, []);
 
   const handlePressAddTask = useCallback(() => {
-    addTaskSheetRef.current?.present();
-  }, []);
+    if (isModalTransitioningRef.current) {
+      console.log('handlePressAddTask: BLOCKED - modal is transitioning');
+      return;
+    }
+
+    setModalTransitioning(true);
+    requestAnimationFrame(() => {
+      console.log('handlePressAddTask: presenting add task sheet');
+      addTaskSheetRef.current?.present();
+    });
+  }, [setModalTransitioning]);
+
+  const handlePressUserMenu = useCallback(() => {
+    if (isModalTransitioningRef.current) {
+      console.log('handlePressUserMenu: BLOCKED - modal is transitioning');
+      return;
+    }
+
+    setModalTransitioning(true);
+    requestAnimationFrame(() => {
+      console.log('handlePressUserMenu: presenting user menu sheet');
+      userMenuSheetRef.current?.present();
+    });
+  }, [setModalTransitioning]);
 
   const handleAddTask = useCallback((taskTitle: string) => {
     // Handle adding the task here - you can integrate with your state management or database
     console.log('New task:', taskTitle);
     // TODO: Add task to your task list/database
   }, []);
+
+  const handleModalDismissStart = useCallback(() => {
+    if (modalTransitionTimeoutRef.current) {
+      clearTimeout(modalTransitionTimeoutRef.current);
+      modalTransitionTimeoutRef.current = null;
+    }
+    if (!isModalTransitioningRef.current) {
+      console.log('handleModalDismissStart: setting transition flag');
+      setModalTransitioning(true);
+    }
+  }, [setModalTransitioning]);
+
+  const handleModalDismiss = useCallback(() => {
+    console.log('handleModalDismiss: scheduling transition flag clear after delay');
+    if (modalTransitionTimeoutRef.current) {
+      clearTimeout(modalTransitionTimeoutRef.current);
+      modalTransitionTimeoutRef.current = null;
+    }
+    modalTransitionTimeoutRef.current = setTimeout(() => {
+      setModalTransitioning(false);
+      modalTransitionTimeoutRef.current = null;
+      console.log('handleModalDismiss: transition flag cleared');
+    }, 0);
+  }, [setModalTransitioning]);
 
   return (
     <View className='flex-1 bg-background'>
@@ -297,6 +357,14 @@ export default function HomeScreen() {
           ref={addTaskSheetRef}
           colorScheme={colorScheme}
           onAddTask={handleAddTask}
+          onDismissStart={handleModalDismissStart}
+          onDismiss={handleModalDismiss}
+        />
+        <UserMenuSheet 
+          ref={userMenuSheetRef} 
+          colorScheme={colorScheme}
+          onDismissStart={handleModalDismissStart}
+          onDismiss={handleModalDismiss}
         />
         <BottomSheetContent
           bottomSheetRef={bottomSheetRef}
@@ -306,6 +374,9 @@ export default function HomeScreen() {
           toggleColorScheme={toggleColorScheme}
           headerHeight={headerHeight}
           onPressAddTask={handlePressAddTask}
+          onPressUserMenu={handlePressUserMenu}
+          disableAddTask={isModalTransitioning}
+          disableUserMenu={isModalTransitioning}
         />
 
     </View>

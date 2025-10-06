@@ -26,7 +26,11 @@ function PopoverContent({
   return (
     <PopoverPrimitive.Portal hostName={portalHost}>
       <FullWindowOverlay>
-        <PopoverPrimitive.Overlay style={Platform.select({ native: StyleSheet.absoluteFill })}>
+        <PopoverPrimitive.Overlay 
+          style={Platform.select({ 
+            native: [StyleSheet.absoluteFill, { zIndex: 9999 }] 
+          })}
+        >
           <NativeOnlyAnimatedView entering={FadeIn.duration(200)} exiting={FadeOut}>
             <TextClassContext.Provider value="text-popover-foreground">
               <PopoverPrimitive.Content
@@ -43,6 +47,7 @@ function PopoverContent({
                   }),
                   className
                 )}
+                style={{ zIndex: 10000 }}
                 {...props}
               />
             </TextClassContext.Provider>

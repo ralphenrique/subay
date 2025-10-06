@@ -7,20 +7,24 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Plus, MoreHorizontal } from 'lucide-react-native';
+import { Sun, Moon, Plus, User } from 'lucide-react-native';
 
 type BottomSheetActionsProps = {
   colorScheme: 'light' | 'dark' | undefined;
   toggleColorScheme: () => void;
   onPressAddTask?: () => void;
-  onPressMore?: () => void;
+  onPressUserMenu?: () => void;
+  disableAddTask?: boolean;
+  disableUserMenu?: boolean;
 };
 
 export const BottomSheetActions: React.FC<BottomSheetActionsProps> = ({
   colorScheme,
   toggleColorScheme,
   onPressAddTask,
-  onPressMore,
+  onPressUserMenu,
+  disableAddTask,
+  disableUserMenu,
 }) => {
   // Animation for icon transition
   const iconTransition = useSharedValue(colorScheme === 'dark' ? 1 : 0);
@@ -77,17 +81,20 @@ export const BottomSheetActions: React.FC<BottomSheetActionsProps> = ({
       <Button
         className='flex-1 h-14 rounded-full items-center justify-center'
         onPress={onPressAddTask}
+        // disabled={disableAddTask}
       >
         <Plus size={24} color={colorScheme === 'dark' ? '#000000' : '#FFFFFF'} />
       </Button>
 
-      {/* Right button - More options */}
-      <Button
-        className='w-14 h-14 rounded-full items-center justify-center p-0'
-        onPress={onPressMore}
+      {/* Right button - User Menu */}
+
+      <Button className='w-14 h-14 rounded-full items-center justify-center p-0'
+        onPress={onPressUserMenu}
+        // disabled={disableUserMenu}
       >
-        <MoreHorizontal size={24} color={colorScheme === 'dark' ? '#000000' : '#FFFFFF'} />
+        <User size={24} color={colorScheme === 'dark' ? '#000000' : '#FFFFFF'} />
       </Button>
+
     </View>
   );
 };

@@ -15,9 +15,8 @@ import { Divider } from '@/components/atoms/divider';
 import { DaySelector, type DayItem } from '@/components/molecules/DaySelector';
 import { TaskListItem, type Task } from '@/components/molecules/TaskListItem';
 import { BottomSheetActions } from '@/components/molecules/BottomSheetActions';
-import { UserMenuButton } from '@/components/molecules/UserMenuButton';
-import { GuestPrompt } from '@/components/molecules/GuestPrompt';
 import { TaskSyncIndicator } from '@/components/atoms/TaskSyncIndicator';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const FALLBACK_HEADER_OFFSET = 98;
 
@@ -59,6 +58,9 @@ type BottomSheetContentProps = {
   toggleColorScheme: () => void;
   headerHeight: number;
   onPressAddTask?: () => void;
+  onPressUserMenu?: () => void;
+  disableAddTask?: boolean;
+  disableUserMenu?: boolean;
 };
 
 export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
@@ -69,6 +71,9 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   toggleColorScheme,
   headerHeight,
   onPressAddTask,
+  onPressUserMenu,
+  disableAddTask,
+  disableUserMenu,
 }) => {
   const { height: SCREEN_HEIGHT } = Dimensions.get('window');
   const snapPoints = useMemo(() => ['30%', '100%'], []);
@@ -128,7 +133,7 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
       transitionEndHeight
     );
 
-    const offsetStart = 30;
+    const offsetStart = 0;
     const offsetEnd = headerHeight > 0 ? headerHeight : FALLBACK_HEADER_OFFSET;
     const translateY = offsetStart + (offsetEnd - offsetStart) * progress;
 
@@ -151,6 +156,14 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
 
   const keyExtractor = useCallback((item: Task) => item.id, []);
 
+  // Gradient colors based on color scheme
+  const gradientColors = useMemo<readonly [string, string]>(() => {
+    if (colorScheme === 'dark') {
+      return ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 1)'];
+    }
+    return ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
+  }, [colorScheme]);
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -169,18 +182,13 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
     >
       <BottomSheetView className='flex-1 h-full'>
         <Animated.View style={animatedBottomSheetContentStyle} className='flex-1'>
-          {/* User Menu and Day selector */}
-          <View className='px-4 pt-2 pb-2'>
-            <UserMenuButton colorScheme={colorScheme} />
+          {/* Day selector */}
+          <View className='px-4 pt-2'>
+            <DaySelector
+              days={dayItems}
+              textColorClass={textColorClass}
+            />
           </View>
-          
-          <DaySelector 
-            days={dayItems}
-            textColorClass={textColorClass}
-          />
-
-          {/* Guest prompt - only shown for non-authenticated users */}
-          <GuestPrompt colorScheme={colorScheme} />
 
           {/* Task list */}
           <BottomSheetFlatList<Task>
@@ -198,11 +206,22 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
           />
         </Animated.View>
 
+        {/* Bottom gradient overlay */}
+        <LinearGradient
+          colors={gradientColors}
+          locations={[0, 1]}
+          style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 200 }}
+          pointerEvents="none"
+        />
+
         {/* Bottom action buttons */}
-        <BottomSheetActions 
+        <BottomSheetActions
           colorScheme={colorScheme}
           toggleColorScheme={toggleColorScheme}
           onPressAddTask={onPressAddTask}
+          onPressUserMenu={onPressUserMenu}
+          disableAddTask={disableAddTask}
+          disableUserMenu={disableUserMenu}
         />
       </BottomSheetView>
     </BottomSheet>
