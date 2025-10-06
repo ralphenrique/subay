@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { View, StyleSheet, Pressable, type DimensionValue } from 'react-native';
+import { View, StyleSheet, Pressable, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -25,6 +25,7 @@ export type CalendarGridData = {
 
 export const GRID_COLUMNS_YEAR = 20;
 export const GRID_COLUMNS_MONTH = 7;
+const GRID_SPACING = 4;
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 export const GRID_MODES: GridMode[] = ['year', 'month'];
 const DOUBLE_TAP_DELAY = 300;
@@ -196,11 +197,9 @@ const calendarGridStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -1,
   },
   cell: {
     aspectRatio: 1,
-    padding: 1,
   },
   dot: {
     flex: 1,
@@ -209,20 +208,51 @@ const calendarGridStyles = StyleSheet.create({
 });
 
 export const CalendarGrid = React.memo(({ data, filledColor, upcomingColor }: CalendarGridProps) => {
-  const cellWidth = useMemo<DimensionValue>(
-    () => (`${100 / data.gridColumns}%` as DimensionValue),
-    [data.gridColumns]
+  const [gridWidth, setGridWidth] = useState<number | null>(null);
+
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+    setGridWidth((previous) => {
+      if (previous !== null && Math.abs(previous - width) < 0.5) {
+        return previous;
+      }
+
+      return width;
+    });
+  }, []);
+
+  const cellSize = useMemo(() => {
+    if (gridWidth === null) {
+      return null;
+    }
+
+    const availableWidth = gridWidth - GRID_SPACING * (data.gridColumns - 1);
+    return availableWidth / data.gridColumns;
+  }, [gridWidth, data.gridColumns]);
+
+  const totalRows = useMemo(
+    () => Math.ceil(data.dayCells.length / data.gridColumns),
+    [data.dayCells.length, data.gridColumns]
   );
 
-  const cells = useMemo(
-    () =>
-      data.dayCells.map((cell) => (
+  const cells = useMemo(() => {
+    if (cellSize === null) {
+      return null;
+    }
+
+    return data.dayCells.map((cell) => {
+      const columnIndex = cell.index % data.gridColumns;
+      const rowIndex = Math.floor(cell.index / data.gridColumns);
+
+      return (
         <View
           key={cell.index}
           style={[
             calendarGridStyles.cell,
             {
-              width: cellWidth,
+              width: cellSize,
+              marginRight: columnIndex === data.gridColumns - 1 ? 0 : GRID_SPACING,
+              marginBottom: rowIndex === totalRows - 1 ? 0 : GRID_SPACING,
               opacity: cell.isCompleted ? 1 : 0.5,
             },
           ]}
@@ -236,11 +266,15 @@ export const CalendarGrid = React.memo(({ data, filledColor, upcomingColor }: Ca
             ]}
           />
         </View>
-      )),
-    [data.dayCells, cellWidth, filledColor, upcomingColor]
-  );
+      );
+    });
+  }, [cellSize, data.dayCells, data.gridColumns, filledColor, upcomingColor, totalRows]);
 
-  return <View style={calendarGridStyles.container}>{cells}</View>;
+  return (
+    <View onLayout={handleLayout} style={calendarGridStyles.container}>
+      {cells}
+    </View>
+  );
 });
 
 CalendarGrid.displayName = 'CalendarGrid';

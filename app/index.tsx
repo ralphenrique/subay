@@ -1,7 +1,8 @@
 import {
   View,
   Dimensions,
-  StyleSheet,
+  type LayoutChangeEvent,
+  KeyboardAvoidingView,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -65,6 +66,7 @@ export default function HomeScreen() {
   defaultStatusBarStyle === 'light' ? 'dark' : 'light';
 
   const [statusBarStyle, setStatusBarStyle] = useState<'light' | 'dark'>(defaultStatusBarStyle);
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   const setStatusBarStyleIfNeeded = useCallback((nextStyle: 'light' | 'dark') => {
     setStatusBarStyle((current) => (current === nextStyle ? current : nextStyle));
@@ -210,6 +212,11 @@ export default function HomeScreen() {
   });
   // Bottom sheet content animation
 
+  const handleHeaderLayout = useCallback((event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    setHeaderHeight((current) => (Math.abs(current - height) < 0.5 ? current : height));
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View className='flex-1 bg-background'>
@@ -228,8 +235,9 @@ export default function HomeScreen() {
             zIndex: 6,
             elevation: 0,
           }}
+          onLayout={handleHeaderLayout}
         >
-          <View className="flex flex-row justify-between mb-8">
+          <View className="flex flex-row justify-between">
             <Animated.Text
               className="text-6xl font-nothing"
               style={animatedTextStyle}
@@ -237,7 +245,7 @@ export default function HomeScreen() {
               {dayName}
             </Animated.Text>
             <Animated.Text
-              className="text-3xl text-right leading-[28px] font-nothing"
+              className="text-3xl text-right leading-[30px] font-nothing"
               style={animatedMutedTextStyle}
               adjustsFontSizeToFit
             >
@@ -262,12 +270,14 @@ export default function HomeScreen() {
             upcomingColor={upcomingColor}
           />
         </View>
+
         <BottomSheetContent
           bottomSheetRef={bottomSheetRef}
           animatedPosition={animatedPosition}
           whiteDefaults={whiteDefaults}
           colorScheme={colorScheme}
           toggleColorScheme={toggleColorScheme}
+          headerHeight={headerHeight}
         />
       </View>
     </GestureHandlerRootView>
