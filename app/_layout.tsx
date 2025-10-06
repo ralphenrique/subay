@@ -41,7 +41,7 @@ export default function RootLayout() {
       <SupabaseProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <BottomSheetModalProvider>
-            <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
+            <ThemeProvider value={NAV_THEME[colorScheme ?? 'dark']}>
               <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
               <Routes fontsReady={fontsReady} />
               <PortalHost />
@@ -70,20 +70,14 @@ function Routes({ fontsReady }: { fontsReady: boolean }) {
 
   return (
     <Stack>
-      {/* Screens only shown when the user is NOT signed in */}
-      {/* <Stack.Protected guard={!isSignedIn}>
-        <Stack.Screen name="(auth)/sign-in" options={SIGN_IN_SCREEN_OPTIONS} />
-        <Stack.Screen name="(auth)/sign-up" options={SIGN_UP_SCREEN_OPTIONS} />
-        <Stack.Screen name="(auth)/reset-password" options={DEFAULT_AUTH_SCREEN_OPTIONS} />
-        <Stack.Screen name="(auth)/forgot-password" options={DEFAULT_AUTH_SCREEN_OPTIONS} />
-      </Stack.Protected> */}
-
-      {/* Screens only shown when the user IS signed in */}
-      <Stack.Protected guard={!isSignedIn}>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-      </Stack.Protected>
-
-      {/* Screens outside the guards are accessible to everyone (e.g. not found) */}
+      {/* Main app - accessible to everyone (signed in or not) */}
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      {/* Auth screens - accessible to everyone */}
+      <Stack.Screen name="(auth)/sign-in" options={SIGN_IN_SCREEN_OPTIONS} />
+      <Stack.Screen name="(auth)/sign-up" options={SIGN_UP_SCREEN_OPTIONS} />
+      <Stack.Screen name="(auth)/reset-password" options={DEFAULT_AUTH_SCREEN_OPTIONS} />
+      <Stack.Screen name="(auth)/forgot-password" options={DEFAULT_AUTH_SCREEN_OPTIONS} />
+      {/* Other screens */}
       <Stack.Screen name="+not-found" options={{ title: 'Oops!' }} />
     </Stack>
   );

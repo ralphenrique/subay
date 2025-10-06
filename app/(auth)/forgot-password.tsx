@@ -1,4 +1,4 @@
-import { ForgotPasswordForm } from '@/components/forgot-password-form';
+import { ForgotPasswordForm } from '@/components/pages/forgot-password-form';
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 

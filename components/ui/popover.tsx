@@ -1,4 +1,4 @@
-import { NativeOnlyAnimatedView } from '@/components/ui/native-only-animated-view';
+import { NativeOnlyAnimatedView } from '@/components/organisms/native-only-animated-view';
 import { TextClassContext } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 import * as PopoverPrimitive from '@rn-primitives/popover';

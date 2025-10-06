@@ -56,7 +56,8 @@ export function SocialConnections() {
 
         // If sign in was successful, set the active session
         if (createdSessionId && setActive) {
-          setActive({ session: createdSessionId });
+          await setActive({ session: createdSessionId });
+          router.replace('/');
           return;
         }
 
@@ -65,8 +66,14 @@ export function SocialConnections() {
         // there are missing requirements, such as MFA
         // Use the `signIn` or `signUp` returned from `startSSOFlow`
         // to handle next steps
-      } catch (err) {
+      } catch (err: any) {
         // See https://go.clerk.com/mRUDrIe for more info on error handling
+        // Handle "session already exists" error
+        if (err?.errors?.[0]?.code === 'session_exists') {
+          // User is already signed in, just redirect to home
+          router.replace('/');
+          return;
+        }
         console.error(JSON.stringify(err, null, 2));
       }
     };

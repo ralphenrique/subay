@@ -12,7 +12,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useUser } from '@clerk/clerk-expo';
 import { useColorScheme } from 'nativewind';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -242,8 +241,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className='flex-1 bg-background'>
+    <View className='flex-1 bg-background'>
         <StatusBar
           style={statusBarStyle}
           animated
@@ -310,7 +308,6 @@ export default function HomeScreen() {
           onPressAddTask={handlePressAddTask}
         />
 
-      </View>
-    </GestureHandlerRootView>
+    </View>
   );
 }

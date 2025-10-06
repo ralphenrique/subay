@@ -1,4 +1,4 @@
-import { SocialConnections } from '@/components/social-connections';
+import { SocialConnections } from '@/components/pages/social-connections';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -94,6 +94,13 @@ export function SignUpForm() {
             </View>
             <Button className="w-full" onPress={onSubmit}>
               <Text>Continue</Text>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onPress={() => router.replace('/')}
+            >
+              <Text>Continue as Guest</Text>
             </Button>
           </View>
           <Text className="text-center text-sm">

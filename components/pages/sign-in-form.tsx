@@ -1,4 +1,4 @@
-import { SocialConnections } from '@/components/social-connections';
+import { SocialConnections } from '@/components/pages/social-connections';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -34,12 +34,20 @@ export function SignInForm() {
       if (signInAttempt.status === 'complete') {
         setError({ email: '', password: '' });
         await setActive({ session: signInAttempt.createdSessionId });
+        router.replace('/');
         return;
       }
       // TODO: Handle other statuses
       console.error(JSON.stringify(signInAttempt, null, 2));
-    } catch (err) {
+    } catch (err: any) {
       // See https://go.clerk.com/mRUDrIe for more info on error handling
+      // Handle "session already exists" error
+      if (err?.errors?.[0]?.code === 'session_exists') {
+        // User is already signed in, just redirect to home
+        router.replace('/');
+        return;
+      }
+      
       if (err instanceof Error) {
         const isEmailMessage =
           err.message.toLowerCase().includes('identifier') ||
@@ -109,6 +117,13 @@ export function SignInForm() {
             </View>
             <Button className="w-full" onPress={onSubmit}>
               <Text>Continue</Text>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onPress={() => router.replace('/')}
+            >
+              <Text>Continue as Guest</Text>
             </Button>
           </View>
           <Text className="text-center text-sm">

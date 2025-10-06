@@ -1,28 +1,28 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
-import { Dimensions, View } from 'react-native';
+import React, { useMemo, useCallback } from 'react';
+import { Dimensions, View, type ListRenderItem } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   SharedValue,
-  withTiming,
-  interpolate,
 } from 'react-native-reanimated';
 import BottomSheet, {
   BottomSheetBackgroundProps,
   BottomSheetView,
-  BottomSheetScrollView,
+  BottomSheetFlatList,
   useBottomSheetSpringConfigs,
-  
 } from '@gorhom/bottom-sheet';
-import { Text } from '@/components/ui/text';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Asterisk, Sun, Calendar, Check, Moon, Plus, MoreHorizontal } from 'lucide-react-native';
+import { Divider } from '@/components/atoms/divider';
+import { DaySelector, type DayItem } from '@/components/molecules/DaySelector';
+import { TaskListItem, type Task } from '@/components/molecules/TaskListItem';
+import { BottomSheetActions } from '@/components/molecules/BottomSheetActions';
+import { UserMenuButton } from '@/components/molecules/UserMenuButton';
+import { GuestPrompt } from '@/components/molecules/GuestPrompt';
+import { TaskSyncIndicator } from '@/components/atoms/TaskSyncIndicator';
 
 const FALLBACK_HEADER_OFFSET = 98;
 
 // Dummy task data
-const DUMMY_TASKS = [
+const DUMMY_TASKS: Task[] = [
   { id: '1', icon: 'asterisk', title: "Daria's 20th Birthday", time: '', completed: false, color: '#FF6B6B' },
   { id: '2', icon: 'sun', title: 'Wake up', time: '09:00', completed: false, color: '#FFD93D' },
   { id: '3', icon: 'calendar', title: 'Design Crit', time: '10:00', completed: false, color: '#A0A0A0' },
@@ -73,14 +73,16 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   const { height: SCREEN_HEIGHT } = Dimensions.get('window');
   const snapPoints = useMemo(() => ['30%', '100%'], []);
 
-  // Animation for icon transition
-  const iconTransition = useSharedValue(colorScheme === 'dark' ? 1 : 0);
-
-  useEffect(() => {
-    iconTransition.value = withTiming(colorScheme === 'dark' ? 1 : 0, {
-      duration: 300,
-    });
-  }, [colorScheme]);
+  // Day selector data
+  const dayItems = useMemo<DayItem[]>(() => [
+    { day: 9, label: 'MON', active: true },
+    { day: 10, label: 'TUE', active: false },
+    { day: 11, label: 'WED', active: false },
+    { day: 12, label: 'THU', active: false },
+    { day: 13, label: 'FRI', active: false },
+    { day: 14, label: 'SAT', active: false },
+    { day: 15, label: 'SUN', active: false },
+  ], []);
 
   const animationConfigs = useBottomSheetSpringConfigs({
     damping: 80,
@@ -126,7 +128,7 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
       transitionEndHeight
     );
 
-    const offsetStart = 0;
+    const offsetStart = 30;
     const offsetEnd = headerHeight > 0 ? headerHeight : FALLBACK_HEADER_OFFSET;
     const translateY = offsetStart + (offsetEnd - offsetStart) * progress;
 
@@ -137,52 +139,17 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
 
   const textColorClass = colorScheme === 'dark' ? 'text-black' : 'text-white';
 
-  // Animated styles for icon transitions
-  const sunAnimatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(iconTransition.value, [0, 1], [1, 0]);
-    const rotation = interpolate(iconTransition.value, [0, 1], [0, 180]);
-    const scale = interpolate(iconTransition.value, [0, 0.5, 1], [1, 0.8, 0]);
+  const renderTaskItem = useCallback<ListRenderItem<Task>>(
+    ({ item }) => (
+      <TaskListItem
+        task={item}
+        textColorClass={textColorClass}
+      />
+    ),
+    [textColorClass]
+  );
 
-    return {
-      opacity,
-      transform: [{ rotate: `${rotation}deg` }, { scale }],
-      position: 'absolute' as const,
-    };
-  });
-
-  const moonAnimatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(iconTransition.value, [0, 1], [0, 1]);
-    const rotation = interpolate(iconTransition.value, [0, 1], [-180, 0]);
-    const scale = interpolate(iconTransition.value, [0, 0.5, 1], [0, 0.8, 1]);
-
-    return {
-      opacity,
-      transform: [{ rotate: `${rotation}deg` }, { scale }],
-      position: 'absolute' as const,
-    };
-  });
-
-  const getIconComponent = (iconName: string, color: string, completed: boolean) => {
-    const iconColor = completed ? '#A0A0A0' : color;
-    const iconSize = 24;
-
-    switch (iconName) {
-      case 'asterisk':
-        return <Asterisk size={iconSize} color={iconColor} />;
-      case 'sun':
-        return <Sun size={iconSize} color={iconColor} />;
-      case 'calendar':
-        return <Calendar size={iconSize} color={iconColor} />;
-      case 'check':
-        return <Check size={iconSize} color={iconColor} />;
-      case 'moon':
-        return <Moon size={iconSize} color={iconColor} />;
-      default:
-        return <Calendar size={iconSize} color={iconColor} />;
-    }
-  };
-
-
+  const keyExtractor = useCallback((item: Task) => item.id, []);
 
   return (
     <BottomSheet
@@ -202,116 +169,41 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
     >
       <BottomSheetView className='flex-1 h-full'>
         <Animated.View style={animatedBottomSheetContentStyle} className='flex-1'>
-          {/* Day selector */}
-          <View className='flex-row px-4 py-6 gap-2'>
-            {[
-              { day: 9, label: 'MON', active: true },
-              { day: 10, label: 'TUE', active: false },
-              { day: 11, label: 'WED', active: false },
-              { day: 12, label: 'THU', active: false },
-              { day: 13, label: 'MON', active: false },
-              { day: 14, label: 'SAT', active: false },
-              { day: 15, label: 'SUN', active: false },
-            ].map((item, index) => (
-              <View
-                key={index}
-                className={cn(
-                  'flex-1 items-center py-3 rounded-2xl',
-                  item.active ? 'border-2 border-gray-300' : ''
-                )}
-              >
-                <Text className={cn(
-                  'text-3xl font-nothing',
-                  item.active ? textColorClass : 'text-gray-400'
-                )}>
-                  {item.day}
-                </Text>
-                <Text className={cn(
-                  'text-xs font-nothing mt-1',
-                  item.active ? 'text-red-500' : 'text-gray-400'
-                )}>
-                  {item.label}
-                </Text>
-              </View>
-            ))}
+          {/* User Menu and Day selector */}
+          <View className='px-4 pt-2 pb-2'>
+            <UserMenuButton colorScheme={colorScheme} />
           </View>
+          
+          <DaySelector 
+            days={dayItems}
+            textColorClass={textColorClass}
+          />
+
+          {/* Guest prompt - only shown for non-authenticated users */}
+          <GuestPrompt colorScheme={colorScheme} />
 
           {/* Task list */}
-          <BottomSheetScrollView className='flex-1 px-4' contentContainerStyle={{ paddingBottom: 100 }}>
-            {DUMMY_TASKS.map((task, index) => (
-              <View key={task.id}>
-                <View className='flex-row items-center py-4'>
-                  {/* Icon */}
-                  <View className='mr-4'>
-                    {getIconComponent(task.icon, task.color, task.completed)}
-                  </View>
-
-                  {/* Task title */}
-                  <Text className={cn(
-                    'flex-1 text-lg font-nothing',
-                    textColorClass,
-                    task.completed && 'opacity-50'
-                  )}>
-                    {task.title}
-                  </Text>
-
-                  {/* Time */}
-                  {task.time && (
-                    <Text className={cn(
-                      'text-base font-nothing',
-                      'text-gray-400'
-                    )}>
-                      {task.time}
-                    </Text>
-                  )}
-                </View>
-
-                {/* Divider */}
-                {index < DUMMY_TASKS.length - 1 && (
-                  <View className='h-[1px] bg-gray-200 opacity-30' />
-                )}
+          <BottomSheetFlatList<Task>
+            data={DUMMY_TASKS}
+            keyExtractor={keyExtractor}
+            contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 16 }}
+            style={{ flex: 1 }}
+            ListHeaderComponent={(
+              <View className='mb-3'>
+                <TaskSyncIndicator colorScheme={colorScheme} />
               </View>
-            ))}
-          </BottomSheetScrollView>
+            )}
+            renderItem={renderTaskItem}
+            ItemSeparatorComponent={() => <Divider />}
+          />
         </Animated.View>
 
         {/* Bottom action buttons */}
-        <View className='flex-row px-4 py-6 gap-4 items-center'>
-          {/* Left button - Dark/Light mode toggle */}
-          <Button
-            className='w-14 h-14 rounded-full items-center justify-center p-0'
-            onPress={toggleColorScheme}
-          >
-            <View className='w-6 h-6 items-center justify-center'>
-              <Animated.View style={sunAnimatedStyle}>
-                <Sun size={24} color='#FFFFFF' />
-              </Animated.View>
-              <Animated.View style={moonAnimatedStyle}>
-                <Moon size={24} color='#000000' />
-              </Animated.View>
-            </View>
-          </Button>
-
-          {/* Center button - Add task */}
-          <Button
-            className='flex-1 h-14 rounded-full items-center justify-center'
-            onPress={() => {
-              onPressAddTask?.();
-            }}
-          >
-            <Plus size={24} color={colorScheme === 'dark' ? '#000000' : '#FFFFFF'} />
-          </Button>
-
-          {/* Right button - More options */}
-          <Button
-            className='w-14 h-14 rounded-full items-center justify-center p-0'
-            onPress={() => {
-              // Template for more options - will be implemented later
-            }}
-          >
-            <MoreHorizontal size={24} color={colorScheme === 'dark' ? '#000000' : '#FFFFFF'} />
-          </Button>
-        </View>
+        <BottomSheetActions 
+          colorScheme={colorScheme}
+          toggleColorScheme={toggleColorScheme}
+          onPressAddTask={onPressAddTask}
+        />
       </BottomSheetView>
     </BottomSheet>
   );
