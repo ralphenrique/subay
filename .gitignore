@@ -35,6 +35,9 @@ yarn-error.*
 # android
 android/
 
+# .vscode
+.vscode/
+
 # typescript
 *.tsbuildinfo
 
