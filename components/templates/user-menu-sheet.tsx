@@ -106,6 +106,8 @@ export const UserMenuSheet = forwardRef<UserMenuSheetRef, UserMenuSheetProps>(
         backdropComponent={renderBackdrop}
         backgroundStyle={{
           backgroundColor: bgColor,
+          borderTopLeftRadius: 50,
+          borderTopRightRadius: 50,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -5 },
           shadowOpacity: 0.5,

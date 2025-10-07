@@ -2,7 +2,6 @@ import React, { useMemo, useCallback } from 'react';
 import { Dimensions, View, type ListRenderItem } from 'react-native';
 import Animated, {
   useAnimatedStyle,
-  useSharedValue,
   SharedValue,
 } from 'react-native-reanimated';
 import BottomSheet, {
@@ -90,7 +89,7 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   ], []);
 
   const animationConfigs = useBottomSheetSpringConfigs({
-    damping: 80,
+    damping: 120,
     stiffness: 500,
   });
 
@@ -169,6 +168,7 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
       ref={bottomSheetRef}
       index={0}
       snapPoints={snapPoints}
+      enableDynamicSizing={false}
       animationConfigs={animationConfigs}
       animatedPosition={animatedPosition}
       topInset={0}

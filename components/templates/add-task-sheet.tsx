@@ -98,7 +98,16 @@ export const AddTaskSheet = forwardRef<AddTaskSheetRef, AddTaskSheetProps>(
         enablePanDownToClose={false}
         animationConfigs={animationConfigs}
         backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: bgColor, shadowColor: '#000', shadowOffset: { width: 0, height: -5 }, shadowOpacity: 0.5, shadowRadius: 5, elevation: 5 }}
+        backgroundStyle={{
+          backgroundColor: bgColor,
+          borderTopLeftRadius: 50,
+          borderTopRightRadius: 50,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -5 },
+          shadowOpacity: 0.5,
+          shadowRadius: 5,
+          elevation: 5
+        }}
         handleIndicatorStyle={{ display: 'none' }}
         containerStyle={{ zIndex: 12 }}
         keyboardBehavior='extend'
