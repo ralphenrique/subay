@@ -12,6 +12,8 @@
   "dependencies": {
     "@clerk/clerk-expo": "^2.14.14",
     "@gorhom/bottom-sheet": "^5",
+    "@legendapp/state": "^3.0.0-beta.34",
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/native": "^7.0.0",
     "@rn-primitives/avatar": "^1.2.0",
     "@rn-primitives/label": "^1.2.0",
@@ -38,6 +40,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.4",
+    "react-native-get-random-values": "~1.11.0",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
@@ -45,7 +48,8 @@
     "react-native-web": "^0.21.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.4.14",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",

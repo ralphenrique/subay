@@ -3,6 +3,8 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Text } from 'react-native';
+import { disableTaskSync, enableTaskSync } from '@/lib/state/tasks';
+import { useAuth } from '@clerk/clerk-expo';
 
 interface SupabaseContextType {
   supabase: SupabaseClient | null;
@@ -13,16 +15,15 @@ const SupabaseContext = createContext<SupabaseContextType>({
   supabase: null,
   isLoaded: false,
 });
+export const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+export const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const { session } = useSession();
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-
+  const { isLoaded: authLoaded, userId, getToken } = useAuth();
   useEffect(() => {
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
     if (!supabaseUrl || !supabaseAnonKey) {
       console.log(supabaseUrl, supabaseAnonKey);
       console.error('Supabase URL or Anon Key is missing');
@@ -46,6 +47,23 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
     setSupabase(client);
     setIsLoaded(true);
   }, [session]);
+
+  useEffect(() => {
+    if (!authLoaded || !supabase) return;
+
+    const enable = async () => {
+      const token = await getToken();
+
+      if (userId && token) {
+        enableTaskSync(supabase, userId);
+      } else {
+        disableTaskSync();
+      }
+    };
+
+    enable();
+
+  }, [supabase, session, userId, authLoaded, getToken]);
 
   if (!isLoaded) {
     return <Text>Loading...</Text>;

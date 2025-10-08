@@ -9,6 +9,8 @@ import {
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react-native';
+import { observer, use$, useObservable } from "@legendapp/state/react"
+import { addTask } from '@/lib/state/tasks';
 
 export type AddTaskSheetRef = {
   present: () => void;
@@ -57,8 +59,13 @@ export const AddTaskSheet = forwardRef<AddTaskSheetRef, AddTaskSheetProps>(
 
     const handleAddTask = () => {
       if (taskTitle.trim()) {
+        // Add to the global store using the addTask function
+        addTask(taskTitle.trim());
+        
+        // Also call the optional callback
         onAddTask?.(taskTitle.trim());
       }
+
       console.log('AddTaskSheet: handleAddTask - calling dismiss');
       onDismissStart?.();
       bottomSheetModalRef.current?.dismiss();

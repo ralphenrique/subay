@@ -16,19 +16,23 @@ import { TaskListItem, type Task } from '@/components/molecules/TaskListItem';
 import { BottomSheetActions } from '@/components/molecules/BottomSheetActions';
 import { TaskSyncIndicator } from '@/components/atoms/TaskSyncIndicator';
 import { LinearGradient } from 'expo-linear-gradient';
+import { observer, useObservable } from '@legendapp/state/react';
+import { getTasksArray } from '@/lib/state/tasks';
+import type { Task as SupabaseTask } from '@/lib/types';
 
 const FALLBACK_HEADER_OFFSET = 98;
 
-// Dummy task data
-const DUMMY_TASKS: Task[] = [
-  { id: '1', icon: 'asterisk', title: "Daria's 20th Birthday", time: '', completed: false, color: '#FF6B6B' },
-  { id: '2', icon: 'sun', title: 'Wake up', time: '09:00', completed: false, color: '#FFD93D' },
-  { id: '3', icon: 'calendar', title: 'Design Crit', time: '10:00', completed: false, color: '#A0A0A0' },
-  { id: '4', icon: 'calendar', title: 'Haircut with Vincent', time: '13:00', completed: false, color: '#A0A0A0' },
-  { id: '5', icon: 'check', title: 'Make pasta', time: '', completed: true, color: '#6BCF7F' },
-  { id: '6', icon: 'calendar', title: 'Pushups ×100', time: '', completed: false, color: '#E0E0E0' },
-  { id: '7', icon: 'moon', title: 'Wind down', time: '21:00', completed: false, color: '#6B5CE7' },
-];
+// Helper function to transform Supabase tasks to UI tasks
+const transformTaskToUITask = (task: SupabaseTask): Task => {
+  return {
+    id: task.id.toString(),
+    icon: task.is_done ? 'check' : 'calendar',
+    title: task.task,
+    time: '', // You can add time parsing logic here if needed
+    completed: task.is_done,
+    color: task.is_done ? '#6BCF7F' : '#A0A0A0',
+  };
+};
 
 const clamp01 = (value: number) => {
   'worklet';
@@ -62,7 +66,7 @@ type BottomSheetContentProps = {
   disableUserMenu?: boolean;
 };
 
-export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
+export const BottomSheetContent: React.FC<BottomSheetContentProps> = observer(({
   bottomSheetRef,
   animatedPosition,
   whiteDefaults,
@@ -76,17 +80,33 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
 }) => {
   const { height: SCREEN_HEIGHT } = Dimensions.get('window');
   const snapPoints = useMemo(() => ['30%', '100%'], []);
+  
+  // Get tasks from the global state and transform them - direct reactive access
+  const supabaseTasks = getTasksArray();
+  const tasks = supabaseTasks.map(transformTaskToUITask);
 
   // Day selector data
-  const dayItems = useMemo<DayItem[]>(() => [
-    { day: 9, label: 'MON', active: true },
-    { day: 10, label: 'TUE', active: false },
-    { day: 11, label: 'WED', active: false },
-    { day: 12, label: 'THU', active: false },
-    { day: 13, label: 'FRI', active: false },
-    { day: 14, label: 'SAT', active: false },
-    { day: 15, label: 'SUN', active: false },
-  ], []);
+  const dayItems = useMemo<DayItem[]>(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dayOfWeek = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const current = new Date(monday);
+      current.setDate(monday.getDate() + index);
+
+      return {
+        day: current.getDate(),
+        label: current.toLocaleDateString(undefined, {
+          weekday: 'short',
+        }).toUpperCase(),
+        active: current.getTime() === today.getTime(),
+      } as DayItem;
+    });
+  }, []);
 
   const animationConfigs = useBottomSheetSpringConfigs({
     damping: 120,
@@ -192,7 +212,7 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
 
           {/* Task list */}
           <BottomSheetFlatList<Task>
-            data={DUMMY_TASKS}
+            data={tasks}
             keyExtractor={keyExtractor}
             contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 16 }}
             style={{ flex: 1 }}
@@ -226,6 +246,6 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
       </BottomSheetView>
     </BottomSheet>
   );
-};
+});
 
 BottomSheetContent.displayName = 'BottomSheetContent';
