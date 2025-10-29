@@ -1,83 +1,29 @@
-That's an excellent idea\! Integrating the app name "Subay" into the template description gives it a unique identity and connects it beautifully to its purpose.
+# Subay
 
-Here is the modified template content with **Subay** incorporated, replacing generic references to "the app" or "this project."
+**Subay** (a Cebuano word meaning "to trace or follow a path") is an application designed to help users track time, manage tasks, and document the daily cadence of their emotions. Essentially, it functions as a comprehensive **journaling app and task tracker.**
 
------
+## Design Acknowledgment
 
-# Clerk Auth Template - Subay
-
-This is a [React Native](https://reactnative.dev) project built with [Expo](https://expo.dev), [Clerk](https://go.clerk.com/gjgxNgT), and [React Native Reusables](https://reactnativereusables.com).
-
-It was initialized using the following command:
-
-```bash
-npx @react-native-reusables/cli@latest init -t moodie
-```
-
-**Subay** (a Cebuano word meaning "to trace or follow a path") is designed to help users track time, complete tasks, and document the daily cadence of their emotions.
+The User Interface (UI) and animation elements within this application are profoundly inspired by and reference the work of **Joi Planner and Left**. Full credit is extended to the original creators, and this work is not claimed as original. This project was undertaken strictly as a technical exercise to explore and implement design replication within the **React Native** cross-platform framework.
 
 ## Getting Started
 
-Before running **Subay**, make sure to:
+Before running **Subay**, please complete the following setup steps:
 
-1.  [Set up your Clerk account](https://go.clerk.com/blVsQlm)
-2.  In the instance setup, leave the default option selected: **Email, phone, username**
-3.  Enable Apple, GitHub, and Google as sign-in options under SSO Connections
-4.  Rename `.env.example` to `.env.local` and paste your `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` from [your API keys](https://go.clerk.com/u8KAui7)
+1.  **Clerk Account Setup:**
+    * [Set up your Clerk account](https://go.clerk.com/blVsQlm).
+    * In the instance setup, maintain the default option selected: **Email, phone, username**.
+    * Enable Apple, GitHub, and Google as sign-in options under **SSO Connections**.
+2.  **Environment Configuration:**
+    * Rename the file `.env.example` to `.env.local`.
+    * Paste your `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` from [your API keys](https://go.clerk.com/u8KAui7) into the new `.env.local` file.
 
-Then start the development server:
+**Note:** This is a local-first application. Database setup is not required solely for exploring the application's features.
+
+### Running the Development Server
+
+Start the application by running the following commands:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-This will launch the Expo Go Server. You can open **Subay** with:
-
-  - **iOS**: press `i` to launch in the iOS simulator (Mac only)
-  - **Android**: press `a` to launch in the Android emulator
-  - **Web**: press `w` to run in a browser
-
-Or scan the QR code with the [Expo Go](https://expo.dev/go) app to test on your device.
-
-## Included Screens and Features
-
-  - Protected routes using Clerk authentication
-  - Sign in screen
-  - OAuth with Apple, GitHub, and Google
-  - Forgot password screen
-  - Reset password screen
-  - Verify email screen
-  - User profile button
-  - Sign out screen
-
-## Project Features
-
-  - ⚛️ Built with [Expo Router](https://expo.dev/router)
-  - 🔐 Authentication powered by [Clerk](https://go.clerk.com/Q1MKAz0)
-  - 🎨 Styled with [Tailwind CSS](https://tailwindcss.com/) via [Nativewind](https://www.nativewind.dev/)
-  - 📦 UI powered by [React Native Reusables](https://github.com/founded-labs/react-native-reusables)
-  - 🚀 New Architecture enabled
-  - 🔥 Edge to Edge enabled
-  - 📱 Runs on iOS, Android, and Web
-
-## Learn More
-
-  - [Clerk Docs](https://go.clerk.com/Q1MKAz0)
-  - [React Native Docs](https://reactnative.dev/docs/getting-started)
-  - [Expo Docs](https://docs.expo.dev/)
-  - [Nativewind Docs](https://www.nativewind.dev/)
-  - [React Native Reusables](https://reactnativereusables.com)
-
------
-
-If this template helps you move faster, consider giving [React Native Reusables](https://github.com/founded-labs/react-native-reusables) a ⭐ on GitHub. It helps a lot\!
-
-# Subay
-
-**Subay:** Track Your Time. Trace Your Feelings.
+bun i
+bun run dev

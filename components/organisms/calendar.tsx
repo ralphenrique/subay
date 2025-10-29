@@ -46,7 +46,7 @@ const calendarGridStyles = StyleSheet.create({
   },
   dot: {
     flex: 1,
-    borderRadius: 9999,
+    borderRadius: 3,
   },
 });
 

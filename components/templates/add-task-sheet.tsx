@@ -5,6 +5,7 @@ import {
   BottomSheetView,
   BottomSheetBackdrop,
   useBottomSheetSpringConfigs,
+  BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';

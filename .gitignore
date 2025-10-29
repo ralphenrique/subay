@@ -39,7 +39,8 @@ android/
 .vscode/
 
 # supabase
-.supabase/
+.supabase/*
+*/supabase/
 
 # typescript
 *.tsbuildinfo

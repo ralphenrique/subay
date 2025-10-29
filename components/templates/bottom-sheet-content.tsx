@@ -26,11 +26,10 @@ const FALLBACK_HEADER_OFFSET = 98;
 const transformTaskToUITask = (task: SupabaseTask): Task => {
   return {
     id: task.id.toString(),
-    icon: task.is_done ? 'check' : 'calendar',
     title: task.task,
     time: '', // You can add time parsing logic here if needed
     completed: task.is_done,
-    color: task.is_done ? '#6BCF7F' : '#A0A0A0',
+    createdAt: task.created_at, // Pass the created_at timestamp
   };
 };
 
@@ -197,12 +196,12 @@ export const BottomSheetContent: React.FC<BottomSheetContentProps> = observer(({
       handleComponent={null}
       backgroundComponent={AnimatedBackground}
       handleStyle={{ display: 'none', height: 0 }}
-      keyboardBehavior='extend'
-      keyboardBlurBehavior='none'
+      // keyboardBehavior='extend'
+      // keyboardBlurBehavior='none'
     >
       <BottomSheetView className='flex-1 h-full'>
         <Animated.View style={animatedBottomSheetContentStyle} className='flex-1'>
-          {/* Day selector */}
+    {/* replace with new sunrisesunset.tsx */}
           <View className='px-4 pt-2'>
             <DaySelector
               days={dayItems}
